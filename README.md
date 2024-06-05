@@ -9,9 +9,9 @@
 
 Dotty-native is a native-image of Scala 3 (dotty) compiler, which can eliminate Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
 
-This approach is limited to certain few usecases as one needs to know reflections and macros used in compilation before making the native-image compiler. Many libraries use reflections/macros in compilation phase and these need to be known before making the native executable of the compiler. The native compiler usually fails when, for example, an unknown library is imported, even if it is not used. Also the errors in these cases, where unknown libraries are imported, are neither novice-friendly nor user-friendly.
+The dotty-native file in the repository is made with linux x86 and has worked with Ubuntu 22.04 and 24.04.
 
-Another bug in the compiler is that it does not return an error code, so one can, for example, check whether it has created any files to know has it worked.
+This approach is limited to certain few usecases as one needs to know reflections and macros used in compilation before making the native-image compiler. Many libraries use reflections/macros in compilation phase and these need to be known before making the native executable of the compiler. The native compiler usually fails when, for example, an unknown library is imported, even if it is not used. Also the errors in these cases, where unknown libraries are imported, are neither novice-friendly nor user-friendly. Another bug in the compiler is that it does not return an error code, so one can, for example, check whether it has created any files to know has it worked.
 
 This repository includes a ```configsFromModules.sh``` script, which can make configuration files from multiple different modules inside a certain folder, so compilation with the native-image compiler works for all of them. For O1 this fails at some modules due to sed commands used in grading but this still works.
 
