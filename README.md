@@ -71,7 +71,7 @@ This approach was tested on 200000 student submissions. All but around 200 submi
     export SCALA_LIB="</PATH/TO/SCALA3LIBRARY>"
     ```
 
-5. Put your libraries' JAR files in the lib folder.
+5. Put your libraries' JAR files in a `lib` folder at the root of the project.
 
     The lib folder already contains the libraries O1 uses as of 24.4.2024.
     The libraries for O1 were copied from a paused grader container.
