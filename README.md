@@ -7,7 +7,7 @@
 
 ### Introduction
 
-Dotty-native is a native-image of Scala 3 (dotty) compiler, which can eliminate Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
+Dotty-native is a native-image of Scala 3 (dotty) compiler, which eliminates Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
 
 The dotty-native file in the repository is made with linux x86 and has worked with Ubuntu 22.04 and 24.04.
 
