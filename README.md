@@ -2,24 +2,68 @@
 
 1. Introduction
 2. How to build a native-image of dotty
+2.1 Using a script (dotty-native.py)
+2.2 Manually
 3. How to use the native-image of dotty
 4. Credentials
 
 ### Introduction
 
-Dotty-native is a native-image of Scala 3 (dotty) compiler, which eliminates Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
+Dotty-native is a native-image of Scala 3 (dotty) compiler, which can eliminate Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
 
-The dotty-native file in the repository is made with linux x86 and has worked with Ubuntu 22.04 and 24.04.
+This approach is limited to certain few usecases as one needs to know reflections and macros used in compilation before making the native-image compiler. Many libraries use reflections/macros in compilation phase and these need to be known before making the native executable of the compiler. The native compiler usually fails when, for example, an unknown library is imported, even if it is not used. Also the errors in these cases, where unknown libraries are imported, are neither novice-friendly nor user-friendly.
 
-This approach is limited to certain few usecases as one needs to know reflections and macros used in compilation before making the native-image compiler. Many libraries use reflections/macros in compilation phase and these need to be known before making the native executable of the compiler. The native compiler usually fails when, for example, an unknown library is imported, even if it is not used. Also the errors in these cases, where unknown libraries are imported, are neither novice-friendly nor user-friendly. Another bug in the compiler is that it does not return an error code, so one can, for example, check whether it has created any files to know has it worked.
+Another bug in the compiler is that it does not return an error code, so one can, for example, check whether it has created any files to know has it worked.
 
-This repository includes a ```configsFromModules.sh``` script, which can make configuration files from multiple different modules inside a certain folder, so compilation with the native-image compiler works for all of them. For O1 this fails at some modules due to sed commands used in grading but this still works.
+This repository includes a ```dotty-native.py``` script, which can make the native-image automatically.
 
 This approach was tested on 200000 student submissions. All but around 200 submissions behaved as expected, and of the 200 submissions, each had a "weird" import.
 
 ### How to build a native image of dotty
 
-1. Download GraalVM (https://www.graalvm.org/downloads/) and set the JAVA_HOME and PATH environment variables. Also check that these are correct (versions do not matter). I suggest saving these commands.
+#### Using a script (dotty-native.py)
+
+1. Download GraalVM (https://www.graalvm.org/downloads/) (blocked on Aalto network, use e.g. mobile hotspot).
+
+2. Install ant, maven and ivy
+
+    ```
+    sudo apt install ant ivy maven
+    ```
+
+3. Clone the Scala 3 compiler (scala/scala3 on GitHub) to a location of your choosing.
+
+4. Put the needed libraries into libmanual folder
+
+    On O1, put O1Library.jar and O1Scalatest.jar to libmanual
+
+    You have to build O1Library and O1Scalatest on your own. O1Library is in o1matsku repo and O1Scalatest in https://version.aalto.fi/gitlab/jsorva/o1scalatest
+
+5. Set variables at the start of the dotty-native.py, e.g.
+
+    ```
+    SCALA_PATH = "/home/komonni/Projects/O1HeadTA/scala3"
+    SCALA_BRANCH = "release-3.3.5"
+    SCALA_FVER = "3.3.4"
+    SCALA_VER = "3"
+    MODULES_PATH = "/home/komonni/Projects/O1HeadTA/o1matsku/modules/solutions"
+    GRAALVM_PATH = "/home/komonni/Downloads/graalvm-jdk-17.0.10+11.1"
+    GRADER_PATH = "/home/komonni/Projects/O1HeadTA/grade-o1"
+    ```
+
+6. Run the script
+
+    It is expected that there are certain failures during the creation of module reflection configuration and the dotty-native should work with them.
+
+    ```
+    python dotty-native.py
+    ```
+
+7. Tadaa you have a working native-image of the Scala 3 compiler. Check the 3rd section for how to use it. Remember to use the extracted Java runtime (extracted-rt.jar) instead of the default one.
+
+#### Manually
+
+1. Download GraalVM (https://www.graalvm.org/downloads/) (blocked on Aalto network, use e.g. mobile hotspot) and set the JAVA_HOME and PATH environment variables. Also check that these are correct (versions do not matter). I suggest saving these commands.
 
     ```
     export JAVA_HOME=/PATH/TO/GRAALVM/
@@ -55,13 +99,7 @@ This approach was tested on 200000 student submissions. All but around 200 submi
     sbt "dist / pack"
     ```
 
-3. Copy the dotty.scala file from this folder to the scala3 folder to simplify the creation of the native image. *Make sure that dotty.scala has the correct scala-compiler version defined in the file*
-
-    ```
-    cp ../dotty-native/dotty.scala .
-    ```
-
-4. Set the SCALA_LIB variable.
+3. Set the SCALA_LIB variable.
 
     ```
     sbt "export scala3-library / fullClasspath"
@@ -71,12 +109,15 @@ This approach was tested on 200000 student submissions. All but around 200 submi
     export SCALA_LIB="</PATH/TO/SCALA3LIBRARY>"
     ```
 
-5. Put your libraries' JAR files in a `lib` folder at the root of the project.
+4. Put your libraries' JAR files in the libmanual folder, put according variables at the start of deps.py and run deps.py.
 
-    The lib folder already contains the libraries O1 uses as of 24.4.2024.
-    The libraries for O1 were copied from a paused grader container.
+    On O1, put O1Library.jar and O1Scalatest.jar to libmanual folder
 
-6. Make configuration files for native-image.
+    The script copies the modules libraries, libmanual and downloads the libraries that the grader uses to lib foilder for the following parts. The script takes automatically the dependencies used in the grader (grade-o1, https://version.aalto.fi/gitlab/narhij3/grade-o1) from its Dockerfile, so make sure it is also up to date.
+
+    You have to build O1Library and O1Scalatest on your own. O1Library is in o1matsku repo and O1Scalatest in https://version.aalto.fi/gitlab/jsorva/o1scalatest
+
+5. Make configuration files for native-image.
     
     This is needed because dotty-native needs to know the used reflections and macros. This can be done automatically with a GraalVM java flag. This repo includes a script to make configuration files from multiple modules inside a folder which can be used, or then one can do manually.
 
@@ -108,13 +149,7 @@ This approach was tested on 200000 student submissions. All but around 200 submi
         java -cp $SCALA_LIB:./compiled main
         ```
 
-7. Create native executable of dotty
-
-    ```
-    scala-cli --power package ./../scala3/dotty.scala -o dotty-native -cp ./lib/* --main-class main --native-image -f --jvm 17 -- --no-fallback -H:ConfigurationFileDirectories=native-image-config
-    ```
-
-8. Extract the Java runtime JAR for dotty-native as Scala
+6. Extract the Java runtime JAR for dotty-native as Scala
 
     This is because the native image does not support the default boot classpath JARs. This runtime jar includes only ```java.base``` and ```java.desktop``` modules by default, but more can be added.
 
@@ -122,13 +157,32 @@ This approach was tested on 200000 student submissions. All but around 200 submi
     scala rt.scala
     ```
 
-9. Check that one can compile with dotty-native and run the compiled file. 
+7. Create pgo instrumented version. Note: This requires the latest GraalVM version as PGO became free during 2024 summer
+
+    ```
+    native-image -o dotty-native-instrumented -cp '../scala3/dist/target/pack/lib/*:./lib/*' --pgo-instrument --no-fallback -H:ConfigurationFileDirectories=native-image-config dotty.tools.dotc.Main
+    ```
+
+8. Run it with hello.scala
+
+    ```
+    mkdir instrumented
+    echo '@main def main = println("Hello world")' > hello.scala
+    ./dotty-native-instrumented -bootclasspath ./extracted-rt.jar -d instrumented -cp $SCALA_LIB hello.scala
+    ```
+
+9. Create native executable of dotty
+
+    ```
+    native-image -o dotty-native -cp '../scala3/dist/target/pack/lib/*:./lib/*' --pgo --no-fallback -H:ConfigurationFileDirectories=native-image-config dotty.tools.dotc.Main
+    ```
+
+10. Check that one can compile with dotty-native and run the compiled file. 
 
     Here again is an example of hello.scala
 
     ```
     mkdir compiled-native
-    echo '@main def main = println("Hello world")' > hello.scala
     ./dotty-native -bootclasspath ./extracted-rt.jar -d compiled-native -cp $SCALA_LIB hello.scala
     java -cp $SCALA_LIB:./compiled-native main
     ```
@@ -140,7 +194,7 @@ Here is how you can use the native image compiler.
 ```
 ./dotty-native -bootclasspath ./extracted-rt.jar -d <WHERE_TO_COMPILE> -cp $SCALA_LIB:<LIB_FOLDER> <FILES_TO_COMPILE>
 
-java -cp $SCALA_LIB <COMPILED_FOLDER> <class to run>
+java -cp $SCALA_LIB:<COMPILED_FOLDER> <class to run>
 ```
 
 ### Credentials

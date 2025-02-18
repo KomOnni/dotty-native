@@ -32,7 +32,7 @@ val buildModules = Vector(
             case a: ZipException =>
                 failedCounter += 1 
                 if failedCounter > 1 then
-                throw new ZipException
+                  throw new ZipException
             case NonFatal(t) =>
                 throw new IOException(s"Exception while extracting $p", t)
             }

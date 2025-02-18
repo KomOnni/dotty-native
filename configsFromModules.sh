@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 #Change these
-MODULES_PATH="/u/93/komulao3/unix/Projects/o1matsku/modules/solutions"
-SCALA_PATH="/u/93/komulao3/unix/Projects/scala3"
+MODULES_PATH=${2:-"/home/komonni/Projects/O1HeadTA/o1matsku/modules/solutions"}
+SCALA_PATH=${3:-"/home/komonni/Projects/O1HeadTA/scala3"}
 
-SCALACFLAGS="-encoding utf-8 -language:postfixOps -color never"
+SCALACFLAGS="-encoding utf-8 -language:postfixOps -Xno-colors"
 DIRECTORY=${1:-tmp-config}
 
 if [[ -z "$SCALA_LIB" ]]; then
@@ -48,12 +48,12 @@ mkdir logs
 i=1
 for dir in "$MODULES_PATH"/* ; do
   if [[ -d "$dir" ]]; then
-    name="$(basename $dir)"
-    files=$(find $dir -type f -name "*.scala" | tr '\n' ' ')
+    name="$(basename "$dir")"
+    files=$(find "$dir" -type f -name "*.scala" | tr '\n' ' ')
     echo "$i/$AMOUNT_OF_MODULES, $name"
-    mkdir configs/$name
-    mkdir compiled/$name
-    java -cp "$SCALA_PATH/dist/target/pack/lib/*" -agentlib:native-image-agent=config-output-dir=configs/$name dotty.tools.dotc.Main $SCALACFLAGS -d compiled/$name -cp $SCALA_LIB:../lib/*:$dir/lib/* $files 2> ./logs/$name.txt  1> ./logs/$name.txt
+    mkdir configs/"$name"
+    mkdir compiled/"$name"
+    java -cp "$SCALA_PATH/dist/target/pack/lib/*" -agentlib:native-image-agent=config-output-dir=configs/"$name" dotty.tools.dotc.Main "$SCALACFLAGS" -d compiled/"$name" -cp "$SCALA_LIB":../lib/*:"$dir"/lib/* $files 2> ./logs/"$name".txt  1> ./logs/"$name".txt
     RES=$?
     [ $RES -eq 1 ] && echo "Compilation failed, log file is in $DIRECTORY/logs/$name.txt"
     i=$((i+1))
