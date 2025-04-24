@@ -3,6 +3,11 @@
 #Change these
 MODULES_PATH=${2:-"/home/komonni/Projects/O1HeadTA/o1matsku/modules/solutions"}
 SCALA_PATH=${3:-"/home/komonni/Projects/O1HeadTA/scala3"}
+COMPILER_JARS_PATH=${4:-"$SCALA_PATH/dist/target/republish/maven2"}
+
+COMPILER_JARS=$(find "$COMPILER_JARS_PATH" -name "*.jar" | tr '\n' ':')
+
+echo "Compiler jars: $COMPILER_JARS"
 
 SCALACFLAGS="-encoding utf-8 -language:postfixOps -Xno-colors"
 DIRECTORY=${1:-tmp-config}
@@ -53,7 +58,7 @@ for dir in "$MODULES_PATH"/* ; do
     echo "$i/$AMOUNT_OF_MODULES, $name"
     mkdir configs/"$name"
     mkdir compiled/"$name"
-    java -cp "$SCALA_PATH/dist/target/pack/lib/*" -agentlib:native-image-agent=config-output-dir=configs/"$name" dotty.tools.dotc.Main "$SCALACFLAGS" -d compiled/"$name" -cp "$SCALA_LIB":../lib/*:"$dir"/lib/* $files 2> ./logs/"$name".txt  1> ./logs/"$name".txt
+    java -cp "$COMPILER_JARS" -agentlib:native-image-agent=config-output-dir=configs/"$name" dotty.tools.dotc.Main "$SCALACFLAGS" -d compiled/"$name" -cp "$SCALA_LIB":../lib/*:"$dir"/lib/* $files 2> ./logs/"$name".txt  1> ./logs/"$name".txt
     RES=$?
     [ $RES -eq 1 ] && echo "Compilation failed, log file is in $DIRECTORY/logs/$name.txt"
     i=$((i+1))

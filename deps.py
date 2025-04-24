@@ -6,7 +6,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Process some paths and versions.')
 parser.add_argument('--grader-path', default='../grade-o1', help='Path to the grader directory')
 parser.add_argument('--scala-path', default='../scala', help='Path to the Scala directory')
-parser.add_argument('--scala-fver', default='3.3.4', help='Scala version')
+parser.add_argument('--scala-fver', default='3.6.3', help='Scala version')
 parser.add_argument('--modules-path', default='../o1matsku/modules/solutions', help='Path to the modules directory')
 
 args = parser.parse_args()

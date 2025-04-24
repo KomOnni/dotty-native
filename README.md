@@ -3,11 +3,13 @@
 1. Introduction
 2. How to build a native-image of dotty
 2.1 Using a script (dotty-native.py)
-2.2 Manually
+2.2 Manually (Supports only Scala versions up to 3.5)
 3. How to use the native-image of dotty
 4. Credentials
 
 ### Introduction
+
+NOTE: If you build this on Apple Silicon, it wont work on x86 and same otherwise around 
 
 Dotty-native is a native-image of Scala 3 (dotty) compiler, which can eliminate Scala's compiler startup time. It is used in exercise graders for Scala programming courses at Aalto University to speed up compilation. The average speedup from this approach has been more than 10 seconds (~14s -> ~2s) in compilation phase, which was and still is the slowest part in the graders. It is used as a possible speedup and in case it fails, the normal Scala compiler is run to compile or give compiler errors to students.
 
@@ -43,8 +45,8 @@ This approach was tested on 200000 student submissions. All but around 200 submi
 
     ```
     SCALA_PATH = "/home/komonni/Projects/O1HeadTA/scala3"
-    SCALA_BRANCH = "release-3.3.5"
-    SCALA_FVER = "3.3.4"
+    SCALA_BRANCH = "3.3.4"
+    SCALA_FVER = SCALA_BRANCH
     SCALA_VER = "3"
     MODULES_PATH = "/home/komonni/Projects/O1HeadTA/o1matsku/modules/solutions"
     GRAALVM_PATH = "/home/komonni/Downloads/graalvm-jdk-17.0.10+11.1"
